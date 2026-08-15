@@ -31,11 +31,14 @@ def _iter_split(split_name: str, max_records: int | None = None) -> Iterator[dic
         trust_remote_code=True,
     )
     count = 0
-    for record in ds:
-        if max_records is not None and count >= max_records:
-            break
-        yield record
-        count += 1
+    try:
+        for record in ds:
+            if max_records is not None and count >= max_records:
+                break
+            yield record
+            count += 1
+    except Exception as e:
+        logger.warning(f"Stopped streaming {split_name} early due to dataset error: {e}")
     logger.info(f"Finished streaming {count} records from {split_name}")
 
 
@@ -44,13 +47,12 @@ def stream_dataset(
     include_validation: bool = True,
 ) -> Iterator[dict]:
     """
-    Yield records from validation (all) + train (up to train_sample_size).
-    If train_sample_size is 0 or None, only validation is used.
+    Yield records from validation (up to train_sample_size/2) + train (up to train_sample_size).
     """
     train_n = int(os.getenv("TRAIN_SAMPLE_SIZE", "5000")) if train_sample_size is None else train_sample_size
 
     if include_validation:
-        yield from _iter_split("validation")
+        yield from _iter_split("validation", max_records=train_n)
 
     if train_n and train_n > 0:
         yield from _iter_split("train", max_records=train_n)

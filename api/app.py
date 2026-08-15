@@ -67,8 +67,10 @@ def health():
     }
 
 
+from pydantic import BaseModel, Field
+
 class TextQueryRequest(BaseModel):
-    query: str
+    query: str = Field(..., min_length=1)
     top_k: int = 5
     include_sources: bool = True
 

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,27 +8,56 @@
     box-sizing: border-box;
   }
   body {
-    background-color: #020617; /* slate-950 */
-    color: white;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
+    background-color: #9a7251; 
+    color: #f8fafc;
+    /* Adjusted hard-stop gradient to match the exact 45vh horizon line */
+    background-image: linear-gradient(
+      to bottom,
+      #e5a95f 0%,    /* Sunset sky top */
+      #e5a95f 45vh,  /* Sky down to horizon */
+      #529f92 45vh,  /* Water starts */
+      #45867c 75vh,  /* Water deepens */
+      #966c4c 75vh,  /* Sand starts */
+      #8a6345 100%   /* Sand deepens */
+    );
+    background-attachment: fixed;
   }
 }
 
 @layer utilities {
   .animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .line-clamp-4 {
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  /* Custom sleek scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #4b3631;
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2b1b1a;
   }
 }

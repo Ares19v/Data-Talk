@@ -1,48 +1,67 @@
 import React from 'react'
-import { CheckCircle, XCircle, ShieldAlert, Sparkles } from 'lucide-react'
+import { Sun, ShieldAlert, XCircle, Bot } from 'lucide-react'
 
 export default function AnswerPanel({ response }) {
   if (!response) return null
 
-  const { query, answer, success, guardrail_triggered, guardrail_reason, latency } = response
+  const { query, answer, success, guardrail_triggered, guardrail_reason } = response
 
   return (
-    <div className="w-full space-y-4 animate-fade-in">
-      {/* Query echo */}
+    <div className="w-full space-y-4">
+      {/* Query Echo */}
       {query && (
-        <div className="text-xs text-slate-500 px-1">
-          <span className="font-medium text-slate-400">Q:</span> {query}
+        <div className="px-2 flex items-start gap-3 opacity-80">
+          <div className="w-6 h-6 rounded-full bg-[#3a2824] border border-[#4a3530] flex items-center justify-center shrink-0 mt-0.5">
+            <span className="text-xs font-bold text-orange-300">Q</span>
+          </div>
+          <p className="text-base text-orange-200 font-medium leading-relaxed">
+            "{query}"
+          </p>
         </div>
       )}
 
-      {/* Answer card */}
+      {/* Answer Card wrapper for gradient border */}
       <div className={`
-        rounded-2xl p-5 border
+        relative p-[1px] rounded-2xl transition-all duration-500
         ${guardrail_triggered
-          ? 'bg-amber-950/30 border-amber-800/40'
+          ? 'bg-gradient-to-b from-yellow-500/50 to-transparent shadow-[0_0_30px_rgba(234,179,8,0.15)]'
           : success
-          ? 'bg-slate-800/60 border-slate-700/50'
-          : 'bg-red-950/30 border-red-800/40'
+          ? 'bg-gradient-to-b from-teal-500/50 to-transparent shadow-[0_0_30px_rgba(20,184,166,0.15)]'
+          : 'bg-gradient-to-b from-red-500/50 to-transparent'
         }
       `}>
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5">
-            {guardrail_triggered ? (
-              <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0" />
-            ) : success ? (
-              <Sparkles className="w-5 h-5 text-indigo-400 shrink-0" />
-            ) : (
-              <XCircle className="w-5 h-5 text-red-400 shrink-0" />
+        {/* Inner Card */}
+        <div className="bg-[#1c1311]/95 backdrop-blur-3xl rounded-2xl p-6 sm:p-8 flex items-start gap-4 h-full">
+          
+          <div className={`
+            w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-inner
+            ${guardrail_triggered ? 'bg-yellow-500/10 border border-yellow-500/20 text-yellow-500' 
+              : success ? 'bg-teal-500/10 border border-teal-500/20 text-teal-400'
+              : 'bg-red-500/10 border border-red-500/20 text-red-400'}
+          `}>
+            {guardrail_triggered ? <ShieldAlert className="w-5 h-5" /> : success ? <Sun className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+          </div>
+
+          <div className="flex-1 space-y-3 pt-1">
+            <div className="flex items-center gap-2 mb-1">
+              <Bot className="w-4 h-4 text-orange-200/40" />
+              <span className="text-xs font-semibold uppercase tracking-widest text-orange-200/40">AI Response</span>
+            </div>
+            
+            <p className="text-base sm:text-lg text-orange-50 leading-relaxed font-light">
+              {answer}
+            </p>
+
+            {guardrail_triggered && guardrail_reason && (
+              <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+                <span className="text-xs font-medium text-yellow-400">
+                  Guardrail Triggered: {guardrail_reason.replace(/_/g, ' ')}
+                </span>
+              </div>
             )}
           </div>
-          <p className="text-sm leading-relaxed text-slate-100">{answer}</p>
         </div>
-
-        {guardrail_triggered && guardrail_reason && (
-          <p className="mt-2 ml-8 text-xs text-amber-500/70">
-            Guardrail: {guardrail_reason.replace(/_/g, ' ')}
-          </p>
-        )}
       </div>
     </div>
   )

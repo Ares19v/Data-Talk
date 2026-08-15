@@ -118,7 +118,11 @@ class RAGHarness:
 
         # ── Step 2: Retrieval (encode + FAISS + RRF) ─────────────────────
         try:
-            results, retrieval_timings = self.retriever.retrieve(request.query)
+            results, retrieval_timings = self.retriever.retrieve(
+                request.query, 
+                top_k=request.top_k, 
+                top_n=request.top_k
+            )
             timings.update(retrieval_timings)
         except Exception as e:
             logger.error(f"Retrieval failed: {e}", exc_info=True)

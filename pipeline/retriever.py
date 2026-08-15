@@ -57,14 +57,13 @@ class MultiStrategyRetriever:
         self.top_k_per_strategy = top_k_per_strategy
         self.top_n_final = top_n_final
 
-    def retrieve(self, query: str) -> Tuple[List[RetrievalResult], Dict[str, float]]:
+    def retrieve(self, query: str, top_k: int | None = None, top_n: int | None = None) -> Tuple[List[RetrievalResult], Dict[str, float]]:
         """
         Retrieve top-N chunks for a query string.
-
-        Returns:
-            results: List of RetrievalResult sorted best-first
-            timing:  Dict of stage timings in milliseconds
         """
+        k = top_k if top_k is not None else self.top_k_per_strategy
+        n = top_n if top_n is not None else self.top_n_final
+        
         timing: Dict[str, float] = {}
 
         # Step 1: Encode query
@@ -77,12 +76,12 @@ class MultiStrategyRetriever:
         strategy_results: Dict[str, List[Tuple[float, Chunk]]] = {}
 
         for strategy in self.store.get_strategies():
-            hits = self.store.search_strategy(strategy, q_emb, top_k=self.top_k_per_strategy)
+            hits = self.store.search_strategy(strategy, q_emb, top_k=k)
             if hits:
                 strategy_results[strategy] = hits
 
         # Also search the combined index
-        combined_hits = self.store.search_all(q_emb, top_k=self.top_k_per_strategy * 2)
+        combined_hits = self.store.search_all(q_emb, top_k=k * 2)
         if combined_hits:
             strategy_results["combined"] = combined_hits
 
@@ -112,7 +111,7 @@ class MultiStrategyRetriever:
                 faiss_score=faiss_score,
                 strategy=strategy,
             ))
-            if len(results) >= self.top_n_final:
+            if len(results) >= n:
                 break
 
         timing["total_retrieval_ms"] = timing["encode_ms"] + timing["retrieval_ms"] + timing["rrf_ms"]

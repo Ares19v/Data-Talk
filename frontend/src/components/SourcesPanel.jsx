@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
-import { ChevronDown, ChevronUp, BookOpen, Star } from 'lucide-react'
+import { ChevronDown, BookOpen, Star } from 'lucide-react'
 
-const STRATEGY_COLORS = {
-  fixed_size:          'bg-blue-900/40 text-blue-300 border-blue-800/40',
-  semantic_sentence:   'bg-purple-900/40 text-purple-300 border-purple-800/40',
-  passage_aware:       'bg-emerald-900/40 text-emerald-300 border-emerald-800/40',
-  hierarchical_parent: 'bg-amber-900/40 text-amber-300 border-amber-800/40',
-  hierarchical_child:  'bg-orange-900/40 text-orange-300 border-orange-800/40',
-  combined:            'bg-slate-700/40 text-slate-300 border-slate-600/40',
+const STRATEGY_STYLES = {
+  fixed_size:          { bg: 'bg-teal-500/10', border: 'border-teal-500/20', text: 'text-teal-400' },
+  semantic_sentence:   { bg: 'bg-orange-500/10', border: 'border-orange-500/20', text: 'text-orange-400' },
+  passage_aware:       { bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', text: 'text-yellow-400' },
+  hierarchical_parent: { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400' },
+  hierarchical_child:  { bg: 'bg-[#d89656]/10', border: 'border-[#d89656]/20', text: 'text-[#d89656]' },
+  combined:            { bg: 'bg-[#4b3631]/50', border: 'border-[#4b3631]', text: 'text-orange-200' },
 }
 
-function strategyLabel(s) {
+function formatStrategy(s) {
   return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
@@ -19,53 +19,54 @@ export default function SourcesPanel({ sources }) {
   if (!sources || sources.length === 0) return null
 
   return (
-    <div className="w-full">
+    <div className="w-full bg-[#1c1311]/80 backdrop-blur-xl border border-orange-900/30 rounded-2xl overflow-hidden transition-all duration-300">
       <button
-        onClick={() => setOpen((p) => !p)}
-        className="
-          w-full flex items-center justify-between px-4 py-2.5
-          bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/50
-          rounded-xl text-sm text-slate-400 transition
-        "
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between p-5 hover:bg-orange-500/[0.02] transition-colors"
       >
-        <span className="flex items-center gap-2">
-          <BookOpen className="w-4 h-4" />
-          {sources.length} source passage{sources.length !== 1 ? 's' : ''} retrieved
-        </span>
-        {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+            <BookOpen className="w-4 h-4 text-orange-400" />
+          </div>
+          <span className="font-medium text-orange-100">
+            {sources.length} Context Passage{sources.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <ChevronDown className={`w-5 h-5 text-orange-200/50 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      {open && (
-        <div className="mt-2 space-y-2">
-          {sources.map((src, i) => {
-            const colorClass = STRATEGY_COLORS[src.strategy] || STRATEGY_COLORS.combined
-            return (
-              <div
-                key={i}
-                className={`rounded-xl p-4 border text-xs space-y-2 ${colorClass}`}
-              >
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold opacity-60">[{i + 1}]</span>
-                    <span className="font-medium">{strategyLabel(src.strategy)}</span>
-                    {src.is_selected === 1 && (
-                      <span className="flex items-center gap-0.5 text-yellow-400">
-                        <Star className="w-3 h-3 fill-current" />
-                        <span className="text-yellow-400/80">ground truth</span>
+      <div className={`grid transition-all duration-300 ease-in-out ${open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+        <div className="overflow-hidden">
+          <div className="p-5 pt-0 space-y-3">
+            {sources.map((src, i) => {
+              const style = STRATEGY_STYLES[src.strategy] || STRATEGY_STYLES.combined
+              return (
+                <div key={i} className={`rounded-xl p-4 border ${style.bg} ${style.border}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-bold opacity-50 text-orange-200">#{i + 1}</span>
+                      <span className={`text-xs font-semibold tracking-wide uppercase ${style.text}`}>
+                        {formatStrategy(src.strategy)}
                       </span>
-                    )}
+                      {src.is_selected === 1 && (
+                        <span className="flex items-center gap-1 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                          <Star className="w-3 h-3 fill-current" /> Truth
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2 font-mono text-[10px] text-orange-200/50 bg-black/40 px-2 py-1 rounded">
+                      <span>RRF {src.rrf_score.toFixed(3)}</span>
+                      <span className="opacity-50">|</span>
+                      <span>COS {src.faiss_score.toFixed(2)}</span>
+                    </div>
                   </div>
-                  <div className="flex gap-3 opacity-70 font-mono text-[10px]">
-                    <span>RRF {src.rrf_score.toFixed(4)}</span>
-                    <span>cos {src.faiss_score.toFixed(3)}</span>
-                  </div>
+                  <p className="text-sm text-orange-200/80 leading-relaxed font-light">{src.text}</p>
                 </div>
-                <p className="leading-relaxed opacity-90 line-clamp-4">{src.text}</p>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
