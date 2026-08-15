@@ -3,7 +3,9 @@
 
 A production-grade voice-enabled Retrieval-Augmented Generation pipeline on the **`ai4bharat/MSMARCO-XI`** dataset (MS MARCO translated into 22 Indic languages).
 
-![Data Talk Preview](./preview.png)
+![Data Talk Preview 1](./preview.png)
+![Data Talk Preview 2](./preview2.png)
+![Data Talk Preview 3](./preview3.png)
 
 **Pipeline:** `Voice Input → Sarvam STT → Multi-Strategy Chunking/FAISS → RRF Fusion → LLM → Guardrailed Answer`
 
