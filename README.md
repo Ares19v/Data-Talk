@@ -1,170 +1,145 @@
-# Voice-Enabled RAG System
-## HH Goa 2026 — Task 2
+<div align="center">
+  <img src="./preview.png" alt="Data Talk Preview 1" width="800" />
+  
+  <h1>🌴 Data Talk - Voice RAG System 🌴</h1>
+  <p><strong>HH Goa 2026 — Task 2</strong></p>
+  
+  <p>
+    A production-grade, voice-enabled Retrieval-Augmented Generation pipeline built on the <b>ai4bharat/MSMARCO-XI</b> dataset. Features sub-second latency, multi-strategy retrieval, and aggressive hallucination guardrails.
+  </p>
 
-A production-grade voice-enabled Retrieval-Augmented Generation pipeline on the **`ai4bharat/MSMARCO-XI`** dataset (MS MARCO translated into 22 Indic languages).
-
-![Data Talk Preview 1](./preview.png)
-![Data Talk Preview 2](./preview2.png)
-![Data Talk Preview 3](./preview3.png)
-
-**Pipeline:** `Voice Input → Sarvam STT → Multi-Strategy Chunking/FAISS → RRF Fusion → LLM → Guardrailed Answer`
-
----
-
-## Architecture
-
-```
-Microphone (React/Vite UI)
-     │
-     ▼
-Sarvam STT (saaras:v3)          ~300–800ms (network)
-     │
-     ▼
-Input Guardrails                <5ms
-  • Profanity filter
-  • Off-topic cosine distance check
-  • Length validation
-     │
-     ▼
-Query Encoder (all-MiniLM-L6-v2) ~5ms
-     │
-     ▼
-FAISS Multi-Strategy Search     ~8–15ms
-  ┌─ Strategy 1: Fixed-size chunks (256 tok, 64 overlap)
-  ├─ Strategy 2: Semantic sentence chunks (≤192 tok)
-  ├─ Strategy 3: Passage-aware (dataset's own passages)
-  └─ Strategy 4: Hierarchical (parent + child sentences)
-     │
-     ▼
-RRF Fusion                      <1ms
-     │
-     ▼
-Groq LLM (llama-3.1-8b-instant) ~200–400ms
-     │
-     ▼
-Output Guardrails               <5ms
-  • Grounding check (ROUGE-1 recall ≥ 0.10)
-  • Confidence gate (FAISS distance threshold)
-  • Hallucination heuristic
-     │
-     ▼
-Structured Response (Pydantic)
-```
-
-## Latency Targets
-
-| Path | Target |
-|---|---|
-| Retrieval only (encode + FAISS + RRF) | **< 200ms** ✅ |
-| Full pipeline with LLM | ~400–600ms |
-| Full with STT | ~700–1400ms |
+  <p>
+    <code>Voice Input ➡️ Sarvam STT ➡️ Multi-Strategy Chunking/FAISS ➡️ RRF Fusion ➡️ LLM ➡️ Guardrailed Answer</code>
+  </p>
+</div>
 
 ---
 
-## Quick Start
+## 🏗️ Architecture Flow
 
-### 1. Install dependencies
+```mermaid
+graph TD
+    UI[Microphone <br/>React/Vite UI] --> STT[Sarvam STT <br/>saaras:v3]
+    STT --> IG[Input Guardrails <br/>Profanity, Off-topic, Length]
+    
+    IG --> Enc[Query Encoder <br/>all-MiniLM-L6-v2]
+    
+    Enc --> F1[Strategy 1: Fixed-size]
+    Enc --> F2[Strategy 2: Semantic]
+    Enc --> F3[Strategy 3: Passage-aware]
+    Enc --> F4[Strategy 4: Hierarchical]
+    
+    F1 --> RRF[Reciprocal Rank Fusion]
+    F2 --> RRF
+    F3 --> RRF
+    F4 --> RRF
+    
+    RRF --> LLM[Groq LLM <br/>llama-3.1-8b]
+    
+    LLM --> OG[Output Guardrails <br/>ROUGE-1, FAISS gate]
+    
+    OG --> Final[Structured Pydantic Response]
+```
 
+<div align="center">
+  <img src="./preview2.png" alt="Data Talk Preview 2" width="700" />
+  <br/>
+  <i>Seamlessly handles voice queries and retrieves grounded context.</i>
+</div>
+
+---
+
+## ✨ Core Features
+
+### 🧩 Multi-Strategy Chunking
+Four unique chunking strategies are run in parallel across separate FAISS partitions. Results are merged at query time using **Reciprocal Rank Fusion (RRF)**.
+* **Fixed-size + overlap:** 256-token windows, 64-token overlap.
+* **Semantic sentence:** NLTK sentence splitting, merged up to 192 tokens.
+* **Passage-aware:** Uses `passages.English_passages` from the MSMARCO dataset.
+* **Hierarchical:** Parent (full answer) + children (individual sentences).
+
+### 🛡️ Iron-Clad Guardrails
+* **Input Guardrails:** 
+  * Profanity and unsafe content filter (`better_profanity`).
+  * Off-topic detection using cosine similarity against a precomputed domain centroid.
+  * Query length validation.
+* **Output Guardrails:** 
+  * ROUGE-1 recall grounding check (forces the LLM to cite the retrieved context).
+  * FAISS confidence gate (rejects answers if the top retrieved doc is too dissimilar).
+  * Hallucination heuristic (detects "I don't know" when context actually exists).
+
+---
+
+## ⚡ Performance & Benchmarks
+
+<div align="center">
+  <img src="./preview3.png" alt="Data Talk Preview 3" width="700" />
+  <br/>
+  <i>Built-in analytics for latency and retrieval targeting.</i>
+</div>
+
+| Subsystem | Target Latency |
+| :--- | :--- |
+| **Retrieval only** (encode + FAISS + RRF) | **< 200ms** 🚀 |
+| **Text Pipeline** (Retrieval + LLM) | ~400–600ms |
+| **Full Voice Pipeline** (STT + Text) | ~700–1400ms |
+
+You can run your own benchmarks locally using the testing suite:
+```bash
+# Run P50/P70/P90/P100 latency benchmark (100 queries)
+python tests/bench.py --n 100
+
+# Full comprehensive test suite
+pytest tests/test_pipeline_full.py -v
+```
+
+---
+
+## 🚀 Quick Start
+
+### 1. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configure API keys
-
+### 2. Configure API Keys
 ```bash
 cp .env.example .env
-# Edit .env with your Sarvam AI and Groq keys
+# Open .env and add your Sarvam AI and Groq keys.
 ```
 
-### 3. Build the vector index (one-time)
-
+### 3. Build the Vector Index (One-Time)
+This streams the MSMARCO-XI dataset, applies all 4 chunking strategies, embeds everything, and saves the FAISS indices locally.
 ```bash
 python scripts/build_index.py
 ```
 
-This streams the MSMARCO-XI dataset, applies all 4 chunking strategies, embeds everything with `all-MiniLM-L6-v2`, and saves FAISS indices.
-
 ### 4. Run the API Server
-
 ```bash
 uvicorn api.app:app --host 0.0.0.0 --port 8000
 ```
-Endpoints: `POST /query`, `POST /voice-query`, `GET /health`
+*Available Endpoints:* `POST /query`, `POST /voice-query`, `GET /health`
 
-### 5. Run the React Frontend
-
+### 5. Run the React UI
+Open a new terminal window:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-
-Open `http://localhost:3000` in your browser.
-
----
-
-## Benchmark
-
-```bash
-# Run P50/P70/P90/P100 latency benchmark (100 queries)
-python tests/bench.py --n 100
-
-# Run unit tests
-pytest tests/test_guardrails.py -v
-
-# Full smoke test (requires built index)
-python tests/smoke_test.py
-```
+Navigate to `http://localhost:3000` in your browser.
 
 ---
 
-## Chunking Strategies
+## 🛠️ Tech Stack
 
-| Strategy | Description |
-|---|---|
-| **Fixed-size + overlap** | 256-token windows, 64-token overlap |
-| **Semantic sentence** | NLTK sentence split, merge up to 192 tokens |
-| **Passage-aware** | Uses `passages.English_passages` from the dataset directly |
-| **Hierarchical** | Parent = full answer, children = individual sentences with `parent_id` |
-
-All four strategies build separate FAISS partitions. At query time, results are merged using **Reciprocal Rank Fusion (RRF)**.
-
----
-
-## Guardrails
-
-**Input:**
-- Profanity/unsafe content (`better_profanity`)
-- Off-topic detection (cosine distance to domain centroid)
-- Query length validation
-
-**Output:**
-- ROUGE-1 recall grounding check (answer must cite retrieved context)
-- FAISS confidence gate (reject if top retrieved doc is too dissimilar)
-- Hallucination heuristic (detect "I don't know" when context exists)
-
----
-
-## Deployment (HuggingFace Spaces)
-
-1. Create a new HF Space (Gradio SDK)
-2. Push this repo
-3. Add secrets: `SARVAM_API_KEY`, `GROQ_API_KEY`, `FAISS_INDEX_PATH`, `METADATA_PATH`
-4. The pre-built index can be stored in the Space's persistent storage or downloaded from HF Hub
-
----
-
-## Tech Stack
-
-| Component | Library |
-|---|---|
-| STT | `sarvamai` (Saaras v3) |
-| Embeddings | `sentence-transformers` (all-MiniLM-L6-v2) |
-| Vector DB | `faiss-cpu` (IVFFlat + FlatIP) |
-| Chunking | Custom + `nltk` |
-| LLM | `groq` (llama-3.1-8b-instant) |
-| Guardrails | Custom + `better-profanity`, `rouge-score` |
-| API | `fastapi` + `uvicorn` |
-| UI | `gradio` |
-| Retries | `tenacity` |
-| Dataset | `datasets` (HuggingFace streaming) |
+| Domain | Tools Used |
+| :--- | :--- |
+| **Frontend UI** | React, Vite, TailwindCSS, Lucide-React |
+| **API Backend** | FastAPI, Uvicorn, Pydantic |
+| **Speech-to-Text** | Sarvam AI (saaras:v3) |
+| **LLM Generation** | Groq (`llama-3.1-8b-instant`) |
+| **Vector DB** | FAISS CPU (IVFFlat + FlatIP) |
+| **Embeddings** | `sentence-transformers` (`all-MiniLM-L6-v2`) |
+| **Guardrails** | Custom heuristics, `better-profanity`, `rouge-score` |
+| **Data pipeline** | HuggingFace `datasets` |
