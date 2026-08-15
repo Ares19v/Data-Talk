@@ -163,6 +163,12 @@ export default function App() {
 
             <TextQuery onResult={handleResult} onError={handleError} topK={topK} />
 
+            <div className="w-full mt-6 text-center">
+              <span className="text-xs text-orange-100/30 font-medium italic tracking-wide">
+                Try asking: "What is a corporation?"
+              </span>
+            </div>
+
             <div className="w-full mt-8 pt-6 border-t border-white/5 flex justify-end">
               <div className="relative">
                 <button

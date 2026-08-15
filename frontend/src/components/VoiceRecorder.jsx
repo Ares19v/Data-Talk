@@ -68,14 +68,6 @@ export default function VoiceRecorder({ onResult, onError, topK }) {
   return (
     <div className="flex flex-col items-center gap-6">
       <div className="relative flex items-center justify-center">
-        {/* Pulsing rings when recording */}
-        {state === 'recording' && (
-          <>
-            <div className="absolute inset-0 bg-orange-500 rounded-full animate-ping opacity-30" style={{ animationDuration: '2s' }}></div>
-            <div className="absolute inset-[-20%] bg-orange-500 rounded-full animate-ping opacity-15" style={{ animationDuration: '2.5s', animationDelay: '0.2s' }}></div>
-            <div className="absolute inset-[-40%] bg-orange-500 rounded-full animate-ping opacity-10" style={{ animationDuration: '3s', animationDelay: '0.4s' }}></div>
-          </>
-        )}
 
         {/* Main Button */}
         <button

@@ -10,7 +10,7 @@ A production-grade voice-enabled Retrieval-Augmented Generation pipeline on the 
 ## Architecture
 
 ```
-Microphone (Gradio UI)
+Microphone (React/Vite UI)
      │
      ▼
 Sarvam STT (saaras:v3)          ~300–800ms (network)
@@ -80,21 +80,22 @@ python scripts/build_index.py
 
 This streams the MSMARCO-XI dataset, applies all 4 chunking strategies, embeds everything with `all-MiniLM-L6-v2`, and saves FAISS indices.
 
-### 4. Run the Gradio UI
+### 4. Run the API Server
 
 ```bash
-python ui/app.py
+uvicorn api.app:app --host 0.0.0.0 --port 8000
 ```
-
-Open `http://localhost:7860` in your browser.
-
-### 5. (Optional) Run the API server
-
-```bash
-uvicorn api.app:app --host 0.0.0.0 --port 8000 --reload
-```
-
 Endpoints: `POST /query`, `POST /voice-query`, `GET /health`
+
+### 5. Run the React Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000` in your browser.
 
 ---
 
