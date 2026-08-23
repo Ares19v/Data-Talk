@@ -11,16 +11,20 @@ Uses a structured prompt that:
 from __future__ import annotations
 
 import os
+import re
 import time
 import logging
 from typing import List, Optional
 
+from dotenv import load_dotenv
+load_dotenv()
+
 logger = logging.getLogger(__name__)
 
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.6-27b")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.1"))
-LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "512"))
+LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "1024"))
 
 SYSTEM_PROMPT = """You are a precise question-answering assistant.
 
@@ -128,6 +132,7 @@ class LLMGenerator:
             )
             answer = response.choices[0].message.content.strip()
 
+        answer = re.sub(r'<think>.*?</think>', '', answer, flags=re.DOTALL).strip()
         gen_ms = (time.perf_counter() - t0) * 1000
         logger.debug(f"LLM generated in {gen_ms:.0f}ms")
         return answer, gen_ms

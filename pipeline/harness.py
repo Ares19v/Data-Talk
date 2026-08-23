@@ -17,6 +17,9 @@ import time
 import logging
 from typing import List, Optional
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from pydantic import BaseModel, Field
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
@@ -294,11 +297,25 @@ def get_harness() -> RAGHarness:
             logger.info(f"Loading pre-built FAISS index from {metadata_path}")
             store.load(index_path, metadata_path)
         else:
-            logger.warning(
-                f"No pre-built index found at {metadata_path}. "
-                "Run `python scripts/build_index.py` first, or the system will "
-                "answer with no context."
-            )
+            logger.info("No pre-built index file found. Building starter index from seed knowledge...")
+            try:
+                from ingest.chunkers import MultiStrategyChunker
+                chunker = MultiStrategyChunker()
+                seed_passages = [
+                    {"passage_text": "A corporation is a company or group of people authorized to act as a single entity and recognized as such in law. Corporations are chartered by states and have independent legal rights.", "query_id": 1, "is_selected": 1},
+                    {"passage_text": "Machine learning is a branch of artificial intelligence and computer science that focuses on using data and algorithms to enable AI to imitate the way that humans learn, gradually improving its accuracy.", "query_id": 2, "is_selected": 1},
+                    {"passage_text": "Common symptoms of diabetes include frequent urination, excessive thirst, persistent hunger, unexplained weight loss, fatigue, and blurry vision. Proper diagnosis requires medical blood tests.", "query_id": 3, "is_selected": 1},
+                    {"passage_text": "Data-Talk is an enterprise Voice-RAG pipeline enabling low-latency semantic search, audio transcription, and LLM answer generation over MSMARCO passage collections.", "query_id": 4, "is_selected": 1},
+                    {"passage_text": "FastAPI is a modern, fast web framework for building APIs with Python based on standard Python type hints, Starlette, and Pydantic.", "query_id": 5, "is_selected": 1},
+                    {"passage_text": "Honesty is the condition of being honest and truthful. Integrity represents adherence to moral and ethical principles and consistency of actions and values.", "query_id": 6, "is_selected": 1}
+                ]
+                chunks = []
+                for p in seed_passages:
+                    chunks.extend(chunker.chunk_record(p))
+                store.build_from_chunks(chunks)
+                logger.info(f"Built starter index with {store.total_vectors()} vectors")
+            except Exception as e:
+                logger.warning(f"Could not build starter index: {e}")
 
         _harness_singleton = RAGHarness(store=store)
     return _harness_singleton
