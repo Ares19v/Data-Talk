@@ -56,6 +56,14 @@ def root():
 
 @app.get("/health")
 def health():
+    return {
+        "status": "ok",
+        "service": "data-talk-backend"
+    }
+
+
+@app.get("/stats")
+def stats():
     harness = get_harness()
     total = harness.store.total_vectors()
     strategies = harness.store.get_strategies()

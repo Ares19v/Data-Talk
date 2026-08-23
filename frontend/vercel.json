@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/query",
+      "destination": "https://data-talk-backend.onrender.com/query"
+    },
+    {
+      "source": "/voice-query",
+      "destination": "https://data-talk-backend.onrender.com/voice-query"
+    },
+    {
+      "source": "/health",
+      "destination": "https://data-talk-backend.onrender.com/health"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
