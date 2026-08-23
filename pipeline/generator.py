@@ -132,7 +132,13 @@ class LLMGenerator:
             )
             answer = response.choices[0].message.content.strip()
 
-        answer = re.sub(r'<think>.*?</think>', '', answer, flags=re.DOTALL).strip()
+        # Robustly strip thinking tags even if unclosed or truncated
+        answer = re.sub(r'<think>.*?(?:</think>|$)', '', answer, flags=re.DOTALL).strip()
+        if not answer:
+            # Fallback if entire completion was within unclosed thinking tag
+            lines = response.choices[0].message.content.strip().splitlines()
+            answer = lines[-1].strip() if lines else "Answer generated."
+
         gen_ms = (time.perf_counter() - t0) * 1000
         logger.debug(f"LLM generated in {gen_ms:.0f}ms")
         return answer, gen_ms
