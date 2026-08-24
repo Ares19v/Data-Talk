@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://data-talk-backend.onrender.com' : '')
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '',
+  baseURL: API_BASE,
   timeout: 60000,
 })
 
