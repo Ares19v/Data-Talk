@@ -3,6 +3,9 @@
   
   <h1>🌴 Data Talk - Voice RAG System 🌴</h1>
   <p><strong>HH Goa 2026 — Task 2</strong></p>
+
+[![CI](https://github.com/Ares19v/Data-Talk/actions/workflows/ci.yml/badge.svg)](https://github.com/Ares19v/Data-Talk/actions/workflows/ci.yml)
+
   
   <p>
     A high-performance, voice-enabled Retrieval-Augmented Generation pipeline built on the <b>ai4bharat/MSMARCO-XI</b> dataset. Features sub-second latency, multi-strategy retrieval, and aggressive hallucination guardrails.
