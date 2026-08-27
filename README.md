@@ -5,7 +5,7 @@
   <p><strong>HH Goa 2026 — Task 2</strong></p>
   
   <p>
-    A production-grade, voice-enabled Retrieval-Augmented Generation pipeline built on the <b>ai4bharat/MSMARCO-XI</b> dataset. Features sub-second latency, multi-strategy retrieval, and aggressive hallucination guardrails.
+    A high-performance, voice-enabled Retrieval-Augmented Generation pipeline built on the <b>ai4bharat/MSMARCO-XI</b> dataset. Features sub-second latency, multi-strategy retrieval, and aggressive hallucination guardrails.
   </p>
 
   <p>
