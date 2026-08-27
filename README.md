@@ -146,3 +146,9 @@ Navigate to `http://localhost:3000` in your browser.
 | **Embeddings** | `sentence-transformers` (`all-MiniLM-L6-v2`) |
 | **Guardrails** | Custom heuristics, `better-profanity`, `rouge-score` |
 | **Data pipeline** | HuggingFace `datasets` |
+
+---
+
+© 2025 Devansh Tyagi (Ares19v). All Rights Reserved.
+
+Unauthorized copying, modification, distribution, or use of this project or any of its components, in whole or in part, without explicit written permission from the author is strictly prohibited.
